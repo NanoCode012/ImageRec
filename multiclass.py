@@ -12,6 +12,8 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from img2feat import CNN
 
+from sklearn.svm import SVC
+
 ###
 def save_pkl( filename, clf ):
     with open( filename, mode='wb') as f:
@@ -151,7 +153,7 @@ def main( images, cnn, tencrop, C  ):
     if( tencrop > 0 ): aug = TenCrop( tencrop )
     else: aug = None
 
-    clf = Classifier( cnn=build_cnn(cnn), aug=aug, C=C )
+    clf = Classifier( cnn=build_cnn(cnn), aug=aug, C=C, clf=SVC(C=C, probability=True, kernel='linear') )
     clf.fit( X_train, y_train )
     save_pkl( "multiclass.pkl", clf )
     clf = load_pkl( "multiclass.pkl" )
