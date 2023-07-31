@@ -12,6 +12,10 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from img2feat import CNN
 
+from tensorflow.keras.applications.resnet50 import ResNet50
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.resnet50 import preprocess_input
+
 ###
 def save_pkl( filename, clf ):
     with open( filename, mode='wb') as f:
@@ -86,6 +90,8 @@ class TenCrop:
 
 ###
 def build_cnn( cnn ):
+    if cnn.lower() == 'resnet50':
+        return ResNet50(include_top=False, weights='imagenet', pooling='avg')
     try:
         return CNN(cnn)
     except:
@@ -109,7 +115,9 @@ class Classifier:
     def fit( self, images, y ):
         if( self.aug is not None ):
             images, y = self.aug( images, y )
-        X = self.fe( images )
+        images = [preprocess_input(img) for img in images] 
+
+        X = self.fe( np.stack(images ))
 
 #        self.mean = X.mean(axis=0,keepdims=True)
 #        X = X-self.mean
@@ -126,8 +134,9 @@ class Classifier:
             images = self.aug( images )
             s1 = len( images )
             n_aug = s1//s0
+        images = [preprocess_input(img) for img in images] 
 
-        X = self.fe( images )
+        X = self.fe( np.stack(images ))
 #        X = X - self.mean
         X = X / self.scale
 
